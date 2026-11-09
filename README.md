@@ -65,14 +65,11 @@ Facebook Marketing API
 
 ```python
 # ── Facebook ────────────────────────────────
-FACEBOOK_APP_ID       = "..."          # Your Meta App ID
-FACEBOOK_APP_SECRET   = "..."          # Your Meta App Secret
-FACEBOOK_ACCESS_TOKEN = "..."          # Long-lived system user token
-
-AD_ACCOUNTS = [
-    "AD_ACCOUNT_ID_2",                # Account 1
-    "AD_ACCOUNT_ID_3",                # Account 2
-]
+FACEBOOK_APP_ID       = os.environ["FACEBOOK_APP_ID"]
+FACEBOOK_APP_SECRET   = os.environ["FACEBOOK_APP_SECRET"]
+FACEBOOK_ACCESS_TOKEN = os.environ["FACEBOOK_ACCESS_TOKEN"]
+AD_ACCOUNTS = os.environ["FACEBOOK_AD_ACCOUNTS"].split(",")  # comma-separated ad account IDs
+SERVICE_ACCOUNT_FILE  = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]  # path to the key file
 
 # ── BigQuery ─────────────────────────────────
 BQ_PROJECT = "your-gcp-project"
@@ -400,17 +397,17 @@ CREATE OR REPLACE VIEW `your-gcp-project.Meta.creative_performance_view` AS
 
 ## 🔒 Security Notes
 
-| Secret | Location | Action Required |
-|--------|----------|-----------------|
-| `FACEBOOK_ACCESS_TOKEN` | Hardcoded in script | **Move to env var or Secret Manager** |
-| `FACEBOOK_APP_SECRET` | Hardcoded in script | **Move to env var or Secret Manager** |
-| `SERVICE_ACCOUNT_INFO` | Hardcoded in script | **Move to .json keyfile or Secret Manager** |
+No credentials are stored in this repo. Each script reads them from environment variables:
 
-**Recommended:**
-```python
-import os
-FACEBOOK_ACCESS_TOKEN = os.environ["FB_ACCESS_TOKEN"]
-```
+| Variable | What it is |
+|----------|------------|
+| `FACEBOOK_APP_ID` | Meta app ID |
+| `FACEBOOK_APP_SECRET` | Meta app secret |
+| `FACEBOOK_ACCESS_TOKEN` | Long-lived system user token |
+| `FACEBOOK_AD_ACCOUNTS` | Comma-separated ad account IDs |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to the BigQuery service account JSON key, kept outside the repo |
+
+Copy `.env.example` to `.env`, fill in the values and load it before running (for example `set -a; source .env; set +a`). `.env` and key files are in `.gitignore`.
 
 ---
 

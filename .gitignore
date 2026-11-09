@@ -1,0 +1,10 @@
+# Secrets
+.env
+*service-account*.json
+*-key.json
+
+# Local data and logs
+data/
+*.parquet
+*.log
+__pycache__/

@@ -29,14 +29,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-FACEBOOK_APP_ID       = "YOUR_META_APP_ID"
-FACEBOOK_APP_SECRET   = "REMOVED"
-FACEBOOK_ACCESS_TOKEN = "REMOVED"
-AD_ACCOUNTS = [
-    "AD_ACCOUNT_ID_4",
-    "AD_ACCOUNT_ID_5",
-    "AD_ACCOUNT_ID_1"
-]
+# Credentials come from environment variables (see .env.example), never from the code
+FACEBOOK_APP_ID       = os.environ["FACEBOOK_APP_ID"]
+FACEBOOK_APP_SECRET   = os.environ["FACEBOOK_APP_SECRET"]
+FACEBOOK_ACCESS_TOKEN = os.environ["FACEBOOK_ACCESS_TOKEN"]
+AD_ACCOUNTS = os.environ["FACEBOOK_AD_ACCOUNTS"].split(",")  # comma-separated ad account IDs
 
 RAW_DIR = "./data/raw/"
 os.makedirs(RAW_DIR, exist_ok=True)
@@ -46,23 +43,9 @@ BQ_DATASET = "venom"
 BQ_TABLE   = "Facebook_Ads"
 
 # =============================================
-# INLINE SERVICE ACCOUNT CREDENTIALS
+# SERVICE ACCOUNT: path to the JSON key file, kept outside the repo
 # =============================================
-SERVICE_ACCOUNT_INFO = {
-    "type": "service_account",
-    "project_id": "your-gcp-project",
-    "private_key_id": "REMOVED",
-    "private_key": (
-        "REMOVED_PRIVATE_KEY"
-    ),
-    "client_email": "REMOVED",
-    "client_id": "REMOVED",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/etl-121%40your-gcp-project.iam.gserviceaccount.com",
-    "universe_domain": "googleapis.com",
-}
+SERVICE_ACCOUNT_FILE = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
 
 MAX_WORKERS      = 2
 CREATIVE_WORKERS = 8  # reduced from 30 to avoid throttling
@@ -369,8 +352,8 @@ def main():
         logger.error("No accounts returned data — nothing to upload to BigQuery.")
         return
 
-    credentials = service_account.Credentials.from_service_account_info(
-        SERVICE_ACCOUNT_INFO,
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
     client   = bigquery.Client(project=BQ_PROJECT, credentials=credentials)
